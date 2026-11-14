@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ghi Chú Nhanh</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --text-color: #e0e0e0;
+            --toolbar-bg: #1e1e1e;
+            --border-color: #333;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        .app-container {
+            display: flex;
+            flex-direction: column;
+            height: 100dvh; /* Dùng dvh để hiển thị chuẩn trên trình duyệt mobile */
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: var(--bg-color);
+        }
+
+        .toolbar {
+            display: flex;
+            gap: 20px;
+            padding: 15px 20px;
+            background-color: var(--toolbar-bg);
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+        }
+
+        .toolbar button {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .toolbar button:active {
+            opacity: 0.5;
+        }
+
+        .editor {
+            flex: 1;
+            padding: 20px;
+            font-size: 18px; /* Cỡ chữ mặc định */
+            outline: none;
+            overflow-y: auto;
+            line-height: 1.6;
+        }
+
+        /* Placeholder khi chưa nhập gì */
+        .editor[placeholder]:empty:before {
+            content: attr(placeholder);
+            color: #666;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        <div class="toolbar">
+            <button onclick="formatText('bold')" style="font-weight: bold;">B</button>
+            <button onclick="formatText('italic')" style="font-style: italic;">I</button>
+            <button onclick="formatText('underline')" style="text-decoration: underline;">U</button>
+            <button onclick="changeFontSize(2)" style="margin-left: auto;">A+</button>
+            <button onclick="changeFontSize(-2)">A-</button>
+        </div>
+
+        <!-- Khu vực nhập liệu chính -->
+        <div id="editor" class="editor" contenteditable="true" placeholder="Bắt đầu viết những gì chợt nảy ra trong đầu..."></div>
+    </div>
+
+    <script>
+        const editor = document.getElementById('editor');
+        let currentFontSize = 18; // Kích thước mặc định
+
+        // 1. Tải dữ liệu đã lưu khi mở web
+        window.onload = () => {
+            // Tải nội dung
+            const savedContent = localStorage.getItem('myQuickNote_content');
+            if (savedContent) {
+                editor.innerHTML = savedContent;
+            }
+            
+            // Tải cỡ chữ
+            const savedSize = localStorage.getItem('myQuickNote_fontSize');
+            if (savedSize) {
+                currentFontSize = parseInt(savedSize);
+                editor.style.fontSize = currentFontSize + 'px';
+            }
+        };
+
+        // 2. Tự động lưu ngầm mỗi khi gõ phím
+        editor.addEventListener('input', () => {
+            localStorage.setItem('myQuickNote_content', editor.innerHTML);
+        });
+
+        // 3. Xử lý In đậm, In nghiêng, Gạch chân
+        function formatText(command) {
+            document.execCommand(command, false, null);
+            editor.focus(); 
+            // Cập nhật lại localStorage ngay sau khi format
+            localStorage.setItem('myQuickNote_content', editor.innerHTML);
+        }
+
+        // 4. Xử lý tăng/giảm cỡ chữ
+        function changeFontSize(step) {
+            currentFontSize += step;
+            
+            // Giới hạn cỡ chữ nhỏ nhất và lớn nhất
+            if (currentFontSize < 12) currentFontSize = 12;
+            if (currentFontSize > 40) currentFontSize = 40;
+            
+            editor.style.fontSize = currentFontSize + 'px';
+            localStorage.setItem('myQuickNote_fontSize', currentFontSize);
+        }
+    </script>
+
+</body>
+</html>
